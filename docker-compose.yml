@@ -1,0 +1,44 @@
+version: "2"
+
+services:
+  api:
+    image: golang:1.8
+    restart: on-failure
+    volumes:
+      - ./cmd/api:/go/src/github.com/dung13890/micro-go/cmd/api
+      - ./pb:/go/src/github.com/dung13890/micro-go/pb
+      - ./vendor:/go/src/github.com/dung13890/micro-go/vendor
+    working_dir: /go/src/github.com/dung13890/micro-go/cmd/api
+    environment:
+      - GOBIN=/go/bin
+    links:
+      - user
+    tty: true
+  user:
+    image: golang:1.8
+    restart: on-failure
+    volumes:
+      - ./cmd/user:/go/src/github.com/dung13890/micro-go/cmd/user
+      - ./pb:/go/src/github.com/dung13890/micro-go/pb
+      - ./vendor:/go/src/github.com/dung13890/micro-go/vendor
+    working_dir: /go/src/github.com/dung13890/micro-go/cmd/user
+    environment:
+      - GOBIN=/go/bin
+    tty: true
+  caddy:
+    image: abiosoft/caddy
+    restart: always
+    volumes:
+     - ./caddyfile:/srv
+    ports:
+     - "80:80"
+     - "443:443"
+    links:
+      - api
+    tty: true
+  mongodb:
+    image: mongo
+    restart: on-failure
+    volumes:
+      - ./mongodb:/data/db
+    tty: true
